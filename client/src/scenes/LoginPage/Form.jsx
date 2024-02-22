@@ -55,7 +55,52 @@ const Form = () => {
   const isLogin = pageType === 'login';
   const isRegister = pageType === 'register';
 
-  const handleFormSubmit = async (values, onSubmitProps) => {};
+  const register = async (values, onSubmitProps) => {
+    // this allows us to send form info with image
+    const formData = new FormData();
+    for (let value in values) {
+      formData.append(value, values[value]);
+    }
+    formData.append('picturePath', values.picture.name);
+
+    const savedUserResponse = await fetch(
+      'http://localhost:3001/auth/register',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    const savedUser = await savedUserResponse.json();
+    onSubmitProps.resetForm();
+
+    if (savedUser) {
+      setPageType('login');
+    }
+  };
+
+  const login = async (values, onSubmitProps) => {
+    const loggedInResponse = await fetch('http://localhost:3001/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values),
+    });
+    const loggedIn = await loggedInResponse.json();
+    onSubmitProps.resetForm();
+    if (loggedIn) {
+      dispatch(
+        setLogin({
+          user: loggedIn.user,
+          token: loggedIn.token,
+        })
+      );
+      navigate('/home');
+    }
+  };
+
+  const handleFormSubmit = async (values, onSubmitProps) => {
+    if (isLogin) await login(values, onSubmitProps);
+    if (isRegister) await register(values, onSubmitProps);
+  };
 
   return (
     <Formik
@@ -129,7 +174,7 @@ const Form = () => {
                   sx={{ gridColumn: 'span 2' }}
                 />
                 <Box
-                  gridColumn='span 4'
+                  gridColumn='span 2'
                   border={`1px solid ${palette.neutral.medium}`}
                   borderRadius='5px'
                   p='1rem'
@@ -148,7 +193,7 @@ const Form = () => {
                         p='1rem'
                         sx={{ '&:hover': { cursor: 'pointer' } }}
                       >
-                        <input {...getInputProps} />
+                        <input {...getInputProps()} />
                         {!values.picture ? (
                           <p>Add Picture Here</p>
                         ) : (
@@ -163,6 +208,7 @@ const Form = () => {
                 </Box>
               </>
             )}
+
             <TextField
               label='Email'
               onBlur={handleBlur}
@@ -173,7 +219,6 @@ const Form = () => {
               helperText={touched.email && errors.email}
               sx={{ gridColumn: 'span 2' }}
             />
-
             <TextField
               label='Password'
               type='password'
@@ -189,7 +234,37 @@ const Form = () => {
 
           {/* BUTTONS */}
           <Box>
-            <Button></Button>
+            <Button
+              fullWidth
+              type='submit'
+              sx={{
+                m: '2rem 0',
+                p: '1rem',
+                backgroundColor: palette.primary.main,
+                color: palette.background.alt,
+                '&:hover': { color: palette.primary.main },
+              }}
+            >
+              {isLogin ? 'LOGIN' : 'REGISTER'}
+            </Button>
+            <Typography
+              onClick={() => {
+                setPageType(isLogin ? 'register' : 'login');
+                resetForm();
+              }}
+              sx={{
+                textDecoration: 'underline',
+                color: palette.primary.main,
+                '&:hover': {
+                  cursor: 'pointer',
+                  color: palette.primary.light,
+                },
+              }}
+            >
+              {isLogin
+                ? "Don't have an account? Sign Up here."
+                : 'Already have an account? Login here.'}
+            </Typography>
           </Box>
         </form>
       )}
