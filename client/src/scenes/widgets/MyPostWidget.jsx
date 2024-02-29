@@ -58,7 +58,7 @@ const MyPostWidget = ({ picturePath }) => {
   };
 
   return (
-    <WidgetWrapper>
+    <WidgetWrapper mb='2rem'>
       <FlexBetween gap='1.5rem'>
         <UserImage image={picturePath} />
         <InputBase
@@ -163,7 +163,7 @@ const MyPostWidget = ({ picturePath }) => {
             borderRadius: '3rem',
           }}
         >
-          POST
+          <Typography color='white'>POST</Typography>
         </Button>
       </FlexBetween>
     </WidgetWrapper>
